@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api',
+  // baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://bookleaf-backend-node.onrender.com/api',
   headers: {
     'Content-Type': 'application/json',
   },
