@@ -3,13 +3,11 @@
 
 import { useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import apiClient from '@/services/apiClient';
 import {
   Mail,
   Lock,
-  User,
   ArrowRight,
   Loader2,
   AlertCircle,
@@ -34,12 +32,9 @@ interface ApiErrorResponse {
 }
 
 export default function LoginPage() {
-  const router = useRouter();
   const { login } = useAuth();
 
-  const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
-    name: '',
     email: '',
     password: '',
   });
@@ -52,23 +47,10 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const endpoint = isLogin ? '/auth/login' : '/auth/register';
-
-      const payload = isLogin
-        ? {
-            email: formData.email.trim(),
-            password: formData.password,
-          }
-        : {
-            name: formData.name.trim(),
-            email: formData.email.trim(),
-            password: formData.password,
-          };
-
-      const response = await apiClient.post<AuthResponse>(
-        endpoint,
-        payload
-      );
+      const response = await apiClient.post<AuthResponse>('/auth/login', {
+        email: formData.email.trim(),
+        password: formData.password,
+      });
 
       const { token, user } = response.data;
       
@@ -111,11 +93,6 @@ export default function LoginPage() {
     }));
   };
 
-  const toggleAuthMode = () => {
-    setIsLogin((previous) => !previous);
-    setError('');
-  };
-
   return (
     <div className="min-h-screen bg-[#f8f9fa] font-sans flex flex-col justify-center items-center p-4 relative overflow-hidden">
       <div className="absolute top-0 left-0 w-full h-96 bg-slate-900 rounded-b-[100px] shadow-2xl transform -translate-y-20 opacity-5" />
@@ -129,13 +106,11 @@ export default function LoginPage() {
           />
 
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-            {isLogin ? 'Welcome Back' : 'Create an Account'}
+            Welcome Back
           </h1>
 
           <p className="text-sm text-slate-500 mt-2 font-medium">
-            {isLogin
-              ? 'Sign in to access your author portal'
-              : 'Join BookLeaf to publish your journey'}
+            Sign in to access your author portal
           </p>
         </div>
 
@@ -150,35 +125,6 @@ export default function LoginPage() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {!isLogin && (
-            <div>
-              <label
-                htmlFor="name"
-                className="block text-xs font-bold text-slate-700 mb-2 uppercase tracking-wide"
-              >
-                Full Name
-              </label>
-
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <User className="h-5 w-5 text-slate-400" />
-                </div>
-
-                <input
-                  id="name"
-                  type="text"
-                  name="name"
-                  autoComplete="name"
-                  required={!isLogin}
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder="John Doe"
-                  className="w-full pl-11 pr-4 py-3.5 rounded-xl border border-slate-300 bg-[#f8f9fa] focus:bg-white focus:ring-2 focus:ring-slate-900 focus:border-slate-900 outline-none transition-all text-sm font-medium text-slate-900"
-                />
-              </div>
-            </div>
-          )}
-
           <div>
             <label
               htmlFor="email"
@@ -223,7 +169,7 @@ export default function LoginPage() {
                 id="password"
                 type="password"
                 name="password"
-                autoComplete={isLogin ? 'current-password' : 'new-password'}
+                autoComplete="current-password"
                 required
                 value={formData.password}
                 onChange={handleChange}
@@ -245,29 +191,12 @@ export default function LoginPage() {
               </>
             ) : (
               <>
-                {isLogin ? 'Sign In' : 'Create Account'}
+                Sign In
                 <ArrowRight className="w-4 h-4" />
               </>
             )}
           </button>
         </form>
-
-        <div className="mt-8 text-center">
-          <p className="text-sm text-slate-500 font-medium">
-            {isLogin
-              ? "Don't have an author account?"
-              : 'Already have an account?'}{' '}
-
-            <button
-              type="button"
-              onClick={toggleAuthMode}
-              disabled={isLoading}
-              className="text-slate-900 font-bold hover:underline transition-all disabled:opacity-50"
-            >
-              {isLogin ? 'Sign up' : 'Sign in'}
-            </button>
-          </p>
-        </div>
       </div>
 
       <div className="mt-8 text-center z-10 text-slate-400 text-xs font-medium tracking-wider">
